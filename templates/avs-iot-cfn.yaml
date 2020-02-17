@@ -1,0 +1,374 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: 'AWS CloudFormation template for the re:invent 2019'
+Parameters:
+  DeviceName:
+    Description: Hardware Serial number provided to you
+    Type: String
+    MinLength: 1
+    MaxLength: 11
+    AllowedPattern: ^[a-zA-Z0-9]*$
+    ConstraintDescription: You must specify the device name
+Resources:
+  IoTloggingRole:
+    Type: 'AWS::IAM::Role'
+    Properties:
+      AssumeRolePolicyDocument:
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - iot.amazonaws.com
+            Action:
+              - 'sts:AssumeRole'
+      ManagedPolicyArns:
+        - 'arn:aws:iam::aws:policy/service-Role/AWSIoTLogging'
+  
+  IoTdevicedefenderAuditRole:
+    Type: 'AWS::IAM::Role'
+    Properties:
+      AssumeRolePolicyDocument:
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - iot.amazonaws.com
+            Action:
+              - 'sts:AssumeRole'
+      ManagedPolicyArns:
+        - 'arn:aws:iam::aws:policy/service-role/AWSIoTDeviceDefenderAudit'
+
+  
+  IoTdevicemanagementRole:
+    Type: 'AWS::IAM::Role'
+    Properties:
+      AssumeRolePolicyDocument:
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - iot.amazonaws.com
+            Action:
+              - 'sts:AssumeRole'
+      ManagedPolicyArns:
+        - 'arn:aws:iam::aws:policy/service-role/AWSIoTLogging'
+        - 'arn:aws:iam::aws:policy/service-role/AWSIoTThingsRegistration'
+        - 'arn:aws:iam::aws:policy/AmazonS3ReadOnlyAccess'
+  
+  LambdaExecutionRole:
+    Type: 'AWS::IAM::Role'
+    Properties:
+      AssumeRolePolicyDocument:
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - lambda.amazonaws.com
+            Action:
+              - 'sts:AssumeRole'
+      ManagedPolicyArns:
+        - 'arn:aws:iam::aws:policy/AWSIoTFullAccess'
+        - 'arn:aws:iam::aws:policy/AWSXrayWriteOnlyAccess'
+        - 'arn:aws:iam::aws:policy/CloudWatchLogsFullAccess'
+        - 'arn:aws:iam::aws:policy/IAMFullAccess'
+        - 'arn:aws:iam::aws:policy/AmazonS3ReadOnlyAccess'
+  
+  AFROTARole:
+    Type: 'AWS::IAM::Role'
+    Properties:
+      AssumeRolePolicyDocument:
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - iot.amazonaws.com
+            Action:
+              - 'sts:AssumeRole'
+      ManagedPolicyArns:
+        - 'arn:aws:iam::aws:policy/service-role/AmazonFreeRTOSOTAUpdate'
+        - 'arn:aws:iam::aws:policy/IAMFullAccess'
+        - 'arn:aws:iam::aws:policy/AmazonS3ReadOnlyAccess'
+  
+  AlexaSkillProcessorLambda:
+    Type: 'AWS::Lambda::Function'
+    Properties:
+      Code:
+        S3Bucket: alexa-reinvent
+        S3Key: alexalambda.zip
+      Handler: hello_world.handler
+      MemorySize: 128
+      Role: !GetAtt 
+        - LambdaExecutionRole
+        - Arn
+      Runtime: python3.7
+      Timeout: 120
+      Environment:
+        Variables:
+          device:
+            Fn::Sub: ${DeviceName}
+
+  LambdaFunctionInvokeAlexaPermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      Action: lambda:InvokeFunction
+      FunctionName:
+        Ref: AlexaSkillProcessorLambda
+      Principal: alexa-appkit.amazon.com
+  
+  DeviceShadowLambda:
+    Type: 'AWS::Lambda::Function'
+    Properties:
+      Handler: shadow.lambda_handler
+      Role: !GetAtt 
+        - LambdaExecutionRole
+        - Arn
+      Code:
+        S3Bucket: alexa-reinvent
+        S3Key: deviceshadow.zip
+      Runtime: python3.7
+      Timeout: 20
+      TracingConfig:
+        Mode: Active
+      Environment:
+        Variables:
+          thing_name: 
+            Fn::Sub: ${DeviceName}
+
+  DeviceManagementLambda:
+    Type: 'AWS::Lambda::Function'
+    Properties:
+      Handler: devicemgmt.lambda_handler
+      Role: !GetAtt 
+        - LambdaExecutionRole
+        - Arn
+      Code:
+        S3Bucket: alexa-reinvent
+        S3Key: devicemgmtlambda.zip
+      Runtime: python3.7
+      Timeout: 20
+      TracingConfig:
+        Mode: Active
+      Environment:
+        Variables:
+          thing_name: 
+            Fn::Sub: ${DeviceName}
+          device_mgmt_role_arn: !GetAtt
+            - IoTdevicemanagementRole
+            - Arn
+          input_file_bucket: "alexa-reinvent"
+          input_file_key: "bulk.json"
+          logging_role_arn: !GetAtt 
+            - IoTloggingRole
+            - Arn
+  
+  DeviceDefenderAuditLambda:
+    Type: 'AWS::Lambda::Function'
+    Properties:
+      Handler: defender.lambda_handler
+      Role: !GetAtt 
+        - LambdaExecutionRole
+        - Arn
+      Code:
+        S3Bucket: alexa-reinvent
+        S3Key: defenderauditlambda.zip
+      Runtime: python3.7
+      Timeout: 20
+      TracingConfig:
+        Mode: Active
+      Environment:
+        Variables:
+          defender_service_role_arn: !GetAtt
+            - IoTdevicedefenderAuditRole
+            - Arn
+          device_defender_role_arn: !GetAtt 
+            - DevDefenderPublishToTopicRole
+            - Arn
+          sns_arn: !Ref DevDefenderSnsTopic
+  
+  DevDefenderPublishToTopicRole: 
+    Type: AWS::IAM::Role
+    Properties: 
+      AssumeRolePolicyDocument: 
+        Version: '2012-10-17'
+        Statement: 
+        - Effect: Allow
+          Principal: 
+            Service: iot.amazonaws.com
+          Action: 
+          - sts:AssumeRole
+      Path: '/'
+      Policies: 
+      - PolicyName: IoTPublishToSnsTopic
+        PolicyDocument: 
+          Statement: 
+          - Effect: Allow
+            Action: "sns:Publish"
+            Resource: !Ref DevDefenderSnsTopic
+  
+  DevDefenderResultsProcessorLambda:
+    Type: 'AWS::Lambda::Function'
+    Properties:
+      Code:
+        S3Bucket: alexa-reinvent
+        S3Key: devdeflambda.zip
+      Environment:
+        Variables:
+          LOG_LEVEL: DEBUG
+          TARGET_POLICY_NAME: reinventAvsPermissiveIoTPolicy
+      Handler: lambda_function.lambda_handler
+      MemorySize: 128
+      Role:
+        Fn::Sub: ${DevDefenderResultsProcessorLambdaRole.Arn}
+      Runtime: python3.7
+      Timeout: 120
+  
+  DevDefenderResultsProcessorLambdaRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Statement:
+        - Action:
+          - sts:AssumeRole
+          Effect: Allow
+          Principal:
+            Service: lambda.amazonaws.com
+        Version: '2012-10-17'
+      Path: /
+      Policies:
+      - PolicyName: DeviceDefenderListResultsPolicy
+        PolicyDocument:
+          Statement:
+          - Action:
+            - iot:DescribeAccountAuditConfiguration
+            - iot:DescribeAuditTask
+            - iot:ListAuditTasks
+            - iot:ListScheduledAudits
+            - iot:ListAuditFindings
+            Effect: Allow
+            Resource: '*'
+      - PolicyName: IoTUpdatePolicy
+        PolicyDocument:
+          Statement:
+          - Action:
+            - iot:CreatePolicyVersion
+            - iot:DeletePolicyVersion
+            - iot:ListPolicyVersions
+            - iot:SetDefaultPolicyVersion
+            Effect: Allow
+            Resource: arn:aws:iot:*:*:policy/reinventAvsPermissiveIoTPolicy
+      - PolicyName: LambdaCwlPolicy
+        PolicyDocument:
+          Statement:
+          - Action:
+            - logs:CreateLogGroup
+            - logs:CreateLogStream
+            - logs:PutLogEvents
+            Effect: Allow
+            Resource: arn:aws:logs:*:*:*
+  
+  DevDefenderSnsTopic:
+    Properties:
+      DisplayName: DevDefenderTopic
+      Subscription:
+      - Endpoint:
+          Fn::GetAtt:
+          - DevDefenderResultsProcessorLambda
+          - Arn
+        Protocol: lambda
+    Type: AWS::SNS::Topic
+  
+  LambdaFunctionInvokeSNSPermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      Action: lambda:InvokeFunction
+      FunctionName:
+        Ref: DevDefenderResultsProcessorLambda
+      Principal: sns.amazonaws.com
+
+  PermissiveIoTPolicy:
+    Type: AWS::IoT::Policy
+    Properties:
+      PolicyName: reinventAvsPermissiveIoTPolicy
+      PolicyDocument:
+        Statement:
+        - Action:
+          - iot:Connect
+          - iot:Publish
+          - iot:Subscribe
+          - iot:Receive
+          Effect: Allow
+          Resource:
+          - '*'
+        Version: '2012-10-17'
+  
+  InputBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Sub 'reinvent-afrota-${RandomName}'
+
+  # DeviceDefenderSettings:
+  #   Type: Custom::DeviceDefenderSettings
+  #   Properties:
+  #     ServiceToken: !GetAtt 'DeviceDefenderAuditLambda.Arn'
+
+  # DeviceShadowUpdate:
+  #   Type: Custom::DeviceShadowUpdate
+  #   Properties:
+  #     ServiceToken: !GetAtt 'DeviceShadowLambda.Arn'
+
+  RandomName:
+    Type: Custom::RandomNameGenerator
+    Properties:
+      ServiceToken: !GetAtt 'RandomNameGenerator.Arn'
+  
+  RandomNameGenerator:
+    Type: AWS::Lambda::Function
+    Properties:
+      Handler: index.lambda_handler
+      Timeout: 30
+      Role: !GetAtt 'LambdaExecutionRole.Arn'
+      Runtime: python3.7
+      Code:
+        ZipFile: |
+          import base64
+          import json
+          import logging
+          import string
+          import random
+          import boto3
+          from botocore.vendored import requests
+          import cfnresponse
+
+          logger = logging.getLogger()
+          logger.setLevel(logging.INFO)
+
+          def random_string(size=6):
+            return ''.join(random.choice(string.ascii_uppercase + string.digits) for _ in range(size))
+
+          def lambda_handler(event, context):
+            logger.info('got event {}'.format(event))
+            responseData = {}
+
+            if event['RequestType'] == 'Create':
+              number = int(event['ResourceProperties'].get('Number', 6))
+              rs = random_string(number)
+              responseData['upper'] = rs.upper()
+              responseData['lower'] = rs.lower()
+
+            else: # delete / update
+              rs = event['PhysicalResourceId'] 
+              responseData['upper'] = rs.upper()
+              responseData['lower'] = rs.lower()
+                          
+            logger.info('responseData {}'.format(responseData))
+            cfnresponse.send(event, context, cfnresponse.SUCCESS, responseData, responseData['lower'])
+
+Outputs: 
+  DeviceManagementLambda:
+    Value: !Ref DeviceManagementLambda
+    Description: Lambda for bulk provisioning of devices
+  DeviceDefenderLambda:
+    Value: !Ref DevDefenderResultsProcessorLambda
+    Description: Lambda for device defender
+  AlexaSkillProcessorLambda: 
+    Value: !Ref AlexaSkillProcessorLambda
+    Description: Lambda for custom Alexa skill

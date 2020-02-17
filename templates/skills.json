@@ -1,0 +1,83 @@
+{
+  "interactionModel": {
+    "languageModel": {
+      "invocationName": "re invent",
+      "intents": [
+        {
+          "name": "AMAZON.FallbackIntent",
+          "samples": []
+        },
+        {
+          "name": "AMAZON.CancelIntent",
+          "samples": []
+        },
+        {
+          "name": "AMAZON.HelpIntent",
+          "samples": []
+        },
+        {
+          "name": "AMAZON.StopIntent",
+          "samples": []
+        },
+        {
+          "name": "AMAZON.NavigateHomeIntent",
+          "samples": []
+        },
+        {
+          "name": "SmartNurseryCommand",
+          "slots": [
+            {
+              "name": "State",
+              "type": "State"
+            }
+          ],
+          "samples": [
+            "set crib {State}",
+            "set crib speed {State}",
+            "Swing the crib {State}",
+            "{State} crib",
+            "Crib {State}"
+          ]
+        },
+        {
+          "name": "SmartNurseryStatus",
+          "slots": [],
+          "samples": [
+            "swing status",
+            "status now",
+            "what is the status",
+            "status"
+          ]
+        },
+        {
+          "name": "SmartNurseryBabyCheck",
+          "slots": [],
+          "samples": [
+            "what is my baby doing",
+            "baby watch",
+            "watch baby",
+            "watch my baby"
+          ]
+        }
+      ],
+      "types": [
+        {
+          "values": [
+            {
+              "name": {
+                "value": "HIGH"
+              }
+            },
+            {
+              "name": {
+                "value": "LOW"
+              }
+            }
+          ],
+          "name": "State"
+        }
+      ]
+    }
+  },
+  "version": "11"
+}
