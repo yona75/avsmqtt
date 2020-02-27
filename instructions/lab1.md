@@ -23,12 +23,7 @@ In this lab, you will learn how to create a Alexa Voice Product. Then you will c
     -   Linux -  [screen / minicom](./serial.md)
 
 
-2. Read the below and then run the commands to configure the kit to connect to Alexa Voice Services and AWS IoT services. 
-    
-    - *Client id* and *Product Id* is required for the kit to successfully authenticate to Alexa Voice service 
-    - *AWS Account ID* and *Endpoint URL* is required for the kit to successfully authenticate to AWS IoT core
-    - Therefater you enable [*code based linking*](https://developer.amazon.com/docs/alexa-voice-service/code-based-linking-other-platforms.html) for registering this kit to your Amazon Developer account 
-    - Reset reboots the device with the latest confiigurations 
+2. Read the below and then run the commands to identify serian number of the device and configure WiFi. 
 
     Please enter the commands similar to the screenshot below **One by One**
 
@@ -46,7 +41,6 @@ In this lab, you will learn how to create a Alexa Voice Product. Then you will c
     ```
     stty sane
     stty erase [press the Backspace key]
-    
     ```
 
 ## B.  Create AWS resources 
@@ -70,16 +64,45 @@ In this lab, you will learn how to create a Alexa Voice Product. Then you will c
 
     ![alt text](../images/awsconsole.png)
 
-3. Please navigate to the [AWS IoT Console](https://console.aws.amazon.com/iot/) 
+3. Click here to create [cloudformation-stack-us-east-1](https://console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks/create/review?stackName=reinventavsmqtt&templateURL=https://s3.amazonaws.com/alexa-reinvent/avs-iot-cfn.yaml)
+    
+    a. Enter the serial number, you got earlier
+
+    b. Leave rest of the options default and click Create
+
+    ![alt text](../images/cfn.png)
+
+    <span style="color:orange">The cloudformation will take between 3-5 mins to complete. Once complete - </span>
+
+4. Please navigate to the [AWS IoT Console](https://console.aws.amazon.com/iot/) 
 
     - Click Get started (if prompted)
     - select Manage -> Things 
-        - copy the name of the Thing (on the right pane)
-    - This is the serial # of your device (NxP kit) , that you need in step 5 
-
-    ![alt text](../images/thing.png)
+    - on the splash screen select "Register a thing"
     
-3. Please navigate to the [AWS IoT Console](https://console.aws.amazon.com/iot/)           
+    ![alt text](../images/thing-splash.png)
+    
+    - select "Create a single thing"
+    
+    ![alt text](../images/thing-create.png)
+    
+    - in the Name field type the serial number of the device **without =** Leave the rest of the options default and select Next
+    
+    ![alt text](../images/thing-name.png)
+    
+    -  select "Create certificate"
+    
+    ![alt text](../images/thing-cert.png)
+    
+    -  download Certificate and Private key, activate certificate and select "Attach a policy"
+    
+    ![alt text](../images/thing-cert-download.png)
+    
+    -  put the checkbox next to reinventAvsPermissivePoicy amd select "Register Thing"
+
+    ![alt text](../images/thing-policy.png)
+    
+5. Please navigate to the [AWS IoT Console](https://console.aws.amazon.com/iot/)           
     - click *Settings* (left bottom pane)
     - copy the IoT endpoint URL to a local notepad
 
@@ -87,15 +110,6 @@ In this lab, you will learn how to create a Alexa Voice Product. Then you will c
 
     ![alt text](../images/iotendpoint.png)
 
-4. Click here to create [cloudformation-stack-us-east-1](https://console.aws.amazon.com/cloudformation/home?region=us-east-1#/stacks/create/review?stackName=reinventavsmqtt&templateURL=https://s3.amazonaws.com/alexa-reinvent/avs-iot-cfn.yaml)
-    
-    a. Enter the serial number, you copied earlier
-
-    b. Leave rest of the options default and click Create
-
-    ![alt text](../images/cfn.png)
-
-    <span style="color:orange">The cloudformation will take between 3-5 mins to complete. Once complete - </span>
 
 ## C. Create AVS Product  
 
