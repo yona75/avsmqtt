@@ -23,12 +23,7 @@ In this lab, you will learn how to create a Alexa Voice Product. Then you will c
     -   Linux -  [screen / minicom](./serial.md)
 
 
-2. Read the below and then run the commands to configure the kit to connect to Alexa Voice Services and AWS IoT services. 
-    
-    - *Client id* and *Product Id* is required for the kit to successfully authenticate to Alexa Voice service 
-    - *AWS Account ID* and *Endpoint URL* is required for the kit to successfully authenticate to AWS IoT core
-    - Therefater you enable [*code based linking*](https://developer.amazon.com/docs/alexa-voice-service/code-based-linking-other-platforms.html) for registering this kit to your Amazon Developer account 
-    - Reset reboots the device with the latest confiigurations 
+2. Read the below and then run the commands to identify serian number of the device and configure WiFi. 
 
     Please enter the commands similar to the screenshot below **One by One**
 
@@ -46,7 +41,6 @@ In this lab, you will learn how to create a Alexa Voice Product. Then you will c
     ```
     stty sane
     stty erase [press the Backspace key]
-    
     ```
 
 ## B.  Create AWS resources 
