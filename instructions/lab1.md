@@ -7,7 +7,49 @@ In this lab, you will learn how to create a Alexa Voice Product. Then you will c
 ## <span style="color:orange"> You will build step 1a of this architecture :</span>
 ![alt text](../images/arch-1a.png)
 
-## A.  Create AWS resources 
+## A.  Identify Serial number of the NXP kit and configure WiFi
+
+![alt text](../images/nxp-kit.png)
+
+## <span style="color:orange"> You need to establish serial connection to the device : </span>
+
+1. Please connect both the USB ports to the adapter provided, and connect the adapter to the laptop. 
+    ![alt text](../images/laptop.jpg) 
+
+
+2. Connect to the hardware kit using the below instructions - 
+    -   Mac -  [screen](./serial.md)
+    -   Windows - [putty](./serial.md)
+    -   Linux -  [screen / minicom](./serial.md)
+
+
+2. Read the below and then run the commands to configure the kit to connect to Alexa Voice Services and AWS IoT services. 
+    
+    - *Client id* and *Product Id* is required for the kit to successfully authenticate to Alexa Voice service 
+    - *AWS Account ID* and *Endpoint URL* is required for the kit to successfully authenticate to AWS IoT core
+    - Therefater you enable [*code based linking*](https://developer.amazon.com/docs/alexa-voice-service/code-based-linking-other-platforms.html) for registering this kit to your Amazon Developer account 
+    - Reset reboots the device with the latest confiigurations 
+
+    Please enter the commands similar to the screenshot below **One by One**
+
+    ![alt text](../images/wifi.png) 
+
+    ```
+    serial_number
+
+    setup aws-workshop things@@afr
+    ```
+
+    Please **record** the serial number of the device. After you will issue setup command device will restart.
+    If you experience strange behaviour in the MacOS Terminal, please issue following commands
+    
+    ```
+    stty sane
+    stty erase [press the Backspace key]
+    
+    ```
+
+## B.  Create AWS resources 
 
 1. Login to AWS Console 
     -   Launch [Team Dashboard](https://dashboard.eventengine.run/dashboard)
@@ -55,7 +97,7 @@ In this lab, you will learn how to create a Alexa Voice Product. Then you will c
 
     <span style="color:orange">The cloudformation will take between 3-5 mins to complete. Once complete - </span>
 
-## B. Create AVS Product  
+## C. Create AVS Product  
 
 After you've created an Amazon developer account, you'll need to create a product and security profile. This will enable your hardware kit (NxP) to connect to Alexa Voice Service.
 
