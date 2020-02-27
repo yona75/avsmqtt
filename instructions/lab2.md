@@ -10,13 +10,14 @@ In this lab, you will learn how to configure the NxP microcontroller kit to conn
 ## A. Upload certificate and private key to the device
 
 1. Rename the 2 files you've downloaded in Lab 1 to have only .pem extension:
+
 For example:
 ```
 mv f09028b1ba-certificate.pem.crt f09028b1ba-certificate.pem
 mv f09028b1ba-private.pem.key f09028b1ba-private.pem
 ```
 
-2. Upload the certificate to the device:
+2. Upload the **certificate** to the device:
 -  disconnect the cable from the device
 -  hold the button marked SW2 (see the picture) and at the same time insert the USB-C cable into the device. Release the button only when the LED light turn purple
 
@@ -29,9 +30,9 @@ mv f09028b1ba-private.pem.key f09028b1ba-private.pem
 -  drag the certificate file to SLN-BOOT volume. Device will install certificate and reset. (Observe the LED light)
 -  when device will stop flashing orange unplug the power.
 
-3. Upload your private key by repeating the steps in section 2, but with private key file.
+3. Upload the **private key** by repeating the steps in section 2, but with private key file.
 
-## A.  Configure the NxP kit with Alexa
+## B.  Configure the NxP kit with Alexa
 
 ## <span style="color:orange"> Establish serial connection to the device : </span>
 
@@ -106,7 +107,7 @@ mv f09028b1ba-private.pem.key f09028b1ba-private.pem
 
     *And get to know about the fantastic weather in vegas.*
 
-## B.  Navigate to AWS IoT console 
+## C.  Navigate to AWS IoT console 
 
 Please login to the [AWS IoT Console](https://console.aws.amazon.com/iot/) and select *Manage* (on the left pane) -> Things. 
 
