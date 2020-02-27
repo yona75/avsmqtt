@@ -7,16 +7,35 @@ In this lab, you will learn how to configure the NxP microcontroller kit to conn
 ## <span style="color:orange"> You will continue to build step 1a of this architecture :</span>
 ![alt text](../images/arch-1a.png)
 
+## A. Upload certificate and private key to the device
+
+1. Rename the 2 files you've downloaded in Lab 1 to have only .pem extension:
+For example:
+```
+mv f09028b1ba-certificate.pem.crt f09028b1ba-certificate.pem
+mv f09028b1ba-private.pem.key f09028b1ba-private.pem
+```
+
+2. Upload the certificate to the device:
+-  disconnect the cable from the device
+-  hold the button marked SW2 (see the picture) and at the same time insert the USB-C cable into the device. Release the button only when the LED light turn purple
+
+![alt text](../images/bootloader.png)
+
+-  the device will appear in Finder (Mac) or File Explorer (Windows) as SLN-BOOT volume.
+
+![alt text](../images/volume.png)
+
+-  drag the certificate file to SLN-BOOT volume. Device will install certificate and reset. (Observe the LED light)
+-  when device will stop flashing orange unplug the power.
+
+3. Upload your private key by repeating the steps in section 2, but with private key file.
+
 ## A.  Configure the NxP kit with Alexa
-![alt text](../images/nxp-kit.png)
 
-## <span style="color:orange"> You need to establish serial connection to the device : </span>
+## <span style="color:orange"> Establish serial connection to the device : </span>
 
-1. Please connect both the USB ports to the adapter provided, and connect the adapter to the laptop. 
-    ![alt text](../images/laptop.jpg) 
-
-
-2. Connect to the hardware kit using the below instructions - 
+1. Connect to the hardware kit using the below instructions (same as in Lab 1)
     -   Mac -  [screen](./serial.md)
     -   Windows - [putty](./serial.md)
     -   Linux -  [screen / minicom](./serial.md)
@@ -63,14 +82,14 @@ In this lab, you will learn how to configure the NxP microcontroller kit to conn
 
     ![alt text](../images/reg1.png) 
 
-4.  Copy the user code from the logs and navigate to [amazon.code](https://amazon.com/us/code) on your browser to authenticate - 
+3.  Copy the user code from the logs and navigate to [amazon.code](https://amazon.com/us/code) on your browser to authenticate - 
 
     - Login with the same email , if prompted, that you used for the Alexa developers console prior in Lab 1
     - Paste the user code and submit. *Registration successful* should appear on the web page 
 
     ![alt text](../images/lwa.png) 
 
-6. Check back on the serial terminal - 
+4. Check back on the serial terminal - 
     - Device will periodically check for a token, may take up to 60 seconds
     - After that it will register and be ready to use.
     - The log will show if any errors. 
